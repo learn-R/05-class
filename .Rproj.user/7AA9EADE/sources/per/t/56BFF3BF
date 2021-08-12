@@ -1,0 +1,27 @@
+{
+    "id": "56BFF3BF",
+    "path": "~/GitHub/04-class/R/04-practico.Rmarkdown",
+    "project_path": "R/04-practico.Rmarkdown",
+    "type": "r_markdown",
+    "hash": "1081889400",
+    "contents": "",
+    "dirty": true,
+    "created": 1628801582876.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "chunk_output_type": "console",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "495,69",
+        "scrollLine": "480"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1628801985,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1628802906203,
+    "read_only": false,
+    "read_only_alternatives": []
+}
