@@ -1,5 +1,5 @@
 
-# Práctico 4: Transformar y seleccionar variables ----------------------
+# Práctico 3: Transformar y seleccionar variables ----------------------
 
 
 # 0. Instalar paquetes ----------------------------------------------------
