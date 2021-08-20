@@ -4,8 +4,10 @@
 
 # 0. Instalar paquetes ----------------------------------------------------
 
-install.packages("pacman")
-library (pacman)
+#Si ya lo instalaron, no volver a hacer.
+# Si quieren descomentar varias lineas: CTRL + Shift + C
+# install.packages("pacman")
+# library (pacman)
 
 pacman::p_load(tidyverse,
                magrittr,
@@ -16,12 +18,7 @@ pacman::p_load(tidyverse,
 
 # En este práctico, se trabajó con CASEN 2020. 
 
-temp <- tempfile()
-download.file("http://observatorio.ministeriodesarrollosocial.gob.cl/storage/docs/casen/2020/Casen_en_Pandemia_2020_STATA.dta.zip",temp)
-datos <- haven::read_dta(unz(temp, "Casen en Pandemia 2020 STATA.dta"))
-unlink(temp); remove(temp)
-
-datos <- read_dta("../Rproject/input/Casen en Pandemia 2020 STATA.dta") 
+datos <- read_dta("input/data/Casen en Pandemia 2020 STATA.dta") 
 
 ## 1.1. Explorar los datos  -----------------------------------------------
 
