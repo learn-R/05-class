@@ -1,30 +1,31 @@
 ---
 title: "Transformar y seleccionar variables"
-linktitle: "4: Transformar y seleccionar variables"
-date: "2021-08-13"
-menu:
-  example:
-    parent: Ejemplos
-    weight: 4
-type: docs
+subtitle: "Clase N°4"
+date: "30 de Agosto"
+output: html_notebook
 toc: true
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
-## 0. Objetivo de la práctica
+```{r setup, echo=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath(".."))
+```
 
-El objetivo del práctico, es avanzar en el procesamiento de los datos a través de la transformación de las variables a utilizar. Para ello revisaremos procedimientos básicos para el manejo de datos con Rstudio.
+# Objetivo de la clase
+
+Hoy avanzaremos en el procesamiento de los datos a través de la transformación de las variables a utilizar en nuestros análisis. Para ello revisaremos procedimientos básicos e intermedios para el manejo de datos con Rstudio.
+
+![](https://github.com/learn-R/slides/raw/main/img/01/flow-rproject.png)
+
+# 1. Recursos de la clase
+
+## 1. Datos
+
+Seguiremos utilizando los datos [**Encuesta de Caracterización Socioeconómica (CASEN)**](http://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen-en-pandemia-2020), la cuál aprendimos a cargar en la clase anterior. 
 
 
-## 1. Recursos de la práctica
-
-En este práctico utilizaremos la base de datos de la [**Encuesta de Caracterización Socioeconómica (CASEN)**](http://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen-en-pandemia-2020), la cual fue procesada en el [Práctico anterior]().Recuerden siempre consultar el [**manual/libro de códigos**](http://observatorio.ministeriodesarrollosocial.gob.cl/storage/docs/casen/2020/Libro_de_codigos_Base_de_Datos_Casen_en_Pandemia_2020.pdf) antes de trabajar una base de datos.
-
-
-## 2. Librerias a utilizar
-
-En este práctico utilizaremos cuatro paquetes
+## 2. Paquetes utilizar
 
 1. `pacman`: este facilita y agiliza la lectura de los paquetes a utilizar en R
 
@@ -41,56 +42,52 @@ En este práctico utilizaremos cuatro paquetes
 
 ## 1. Cargar librerías
 
-Primero instalamos `pacman` por única vez
-
-```{r eval=FALSE, include=TRUE}
-install.packages("pacman")
-library (pacman)
-```
-
 Luego cargaremos así los paquetes. Les recordamos que cuando luego de un paquete ponemos `::` esto se refiere a que se *"fuerza"* que esa función provenga de *ese paquete*
 
-```{r, include=TRUE}
+```{r paquetes}
 pacman::p_load(tidyverse,
+               haven,
                magrittr,
                car,
                sjmisc)
 ```
 
-
 ## 2. Cargar base de datos
 
-```{r include=FALSE, warning= FALSE , message = F}
-temp <- tempfile()
-download.file("http://observatorio.ministeriodesarrollosocial.gob.cl/storage/docs/casen/2020/Casen_en_Pandemia_2020_STATA.dta.zip",temp)
-datos <- haven::read_dta(unz(temp, "Casen en Pandemia 2020 STATA.dta"))
-unlink(temp); remove(temp)
+Si queremos cargar nuestros datos recordemos las tres preguntas claves que deben hacerse
+
+1. *¿Dónde están mis datos*? (y dónde estoy posicionado yo dentro de mi Rproject) -> Nos permitirá rellenar correctamente la ruta
+
+2. *¿Cómo se llaman mis datos?* (esta es la última parte de la ruta hacia nuestros datos)
+
+3. *¿Cuál es la extensión del archivo?* (saber el formato nos permitirá definir de manera correcta **cuál es la función que ocupamos para llamar nuestros datos**)
+
+```{r datos}
+datos <- read_dta("input/data/Casen en Pandemia 2020 STATA.dta") 
 ```
 
-```{r eval=FALSE, include=TRUE}
-datos <- read_dta("../Rproject/input/Casen en Pandemia 2020 STATA.dta") 
-```
+En el panel **Environment**, visualizamos el nuevo objeto, que posee 185.437 observaciones y 650 variables
 
-En el panel **Environment**, visualizamos el nuevo objeto, que posee `r format( nrow(datos), decimal.mark="," , big.mark = ".")` observaciones (o filas), y `r format(ncol(datos), decimal.mark="," , big.mark = ".")` variables (columnas)
+Recordemos que también podemos explorar los datos con las siguientes funciones.
 
-Recordemos que también podemos explorar la base de datos con las siguientes funciones.
-
-```{r eval=FALSE, include=TRUE}
-# De paquete base
-dim(datos) # nos entrega las dimensiones, es decir el numero de observaciones y el número de variables
-View(datos) # se usa para visualizar la base de datos
+```{r explorar base1}
 names(datos) # entrega los nombres de las variables que componen el dataset
-head(datos) # muestra las primeras filas presentes en el marco de datos
-
-# De sjmisc
-
-find_var(datos, "concepto") # se utiliza para encontrar variables
-
 ```
 
-## 4. Un aspecto clave antes de comenzar: los operadoresAspectos claves antes de comenzar 
+```{r explorar base}
+## De paquete base
+head(datos) # muestra las primeras filas presentes en el marco de datos
+```
 
-Previo a trabajar con la base de datos, debemos repasemos el concepto de **operadores**. Estos símbolos no son de uso exclusivo en R ¡probablemente los conoces desde tus cursos de matemática! Ahora bien, no todos tienen el mismo significado que en otros softwares.
+
+```{r sjmisc}
+# De sjmisc
+find_var(datos, "pobreza") # se utiliza para encontrar variables
+```
+
+## 4. Un aspecto clave antes de comenzar: los operadores
+
+Previo a trabajar con los datos,repasemos el concepto de **operadores**. Estos símbolos no son de uso exclusivo en R ¡probablemente los conoces desde tus cursos de matemática! Ahora bien, no todos tienen el mismo significado que en otros softwares.
 
 Los **operadores** serán símbolos que permitirán, en los distintos procedimientos de procesamiento, simplificar procesos. Por ejemplo, serán útilizados cuando filtremos nuestros datos para personas de ciertas categorías, cuando calculemos variables nuevas (de manera aritmética o condicional) o, simplemente, cuando queramos hacer procesos "concatenados".
 
@@ -144,11 +141,7 @@ Describen relaciones **lógicas** o **condicionales**
 | `any`    |  Ninguna de las condiciones serán utilizadas |
 | `all`    |  Todas las condiciones serán ocupadas |
 
-
-```{r, echo=FALSE, out.width="60%"}
-knitr::include_graphics("/img/example/operad.png", error = FALSE)
-```
-Figura 1: Resumen de operadores
+![](https://github.com/learn-R/slides/raw/main/img/02/01operad.png)
 
 ### Operador pipeline %>% 
 
@@ -169,21 +162,21 @@ Figura 1: Resumen de operadores
 Para **seleccionar variables** ocuparemos `select()`. Existen diversos enfoques para realizarlo. Primero, debemos conocer su estructura
 
 Si queremos incluir las variables `variable1`, `variable2` y `variable3`
-{{< div "note" >}}
+```{r ejemploselect, eval = F}
 select(datos, variable1, variable2, variable3)
-{{< /div >}}
+```
 
 Si queremos excluir anteponemos un menos `-variable1`
-{{< div "note" >}}
+```{r ejemploselect2, eval=FALSE}
 select(datos, -variable1)
-{{< /div >}}
+```
 
 
 #### `select()` por indexación
 
 La indexación refiere al orden que tiene la columna o variable dentro de los datos. Imaginemos que queremos seleccionar:
 
-```{r}
+```{r select}
 select(datos, 1, 2) # la primera y la segunda columna
 
 select(datos, 1:4) # la primera hasta la cuarta columna
@@ -195,13 +188,13 @@ select(datos, c(1,4)) # la primera y la cuarta columna
 
 Si conocemos el nombre de la variable simplemente lo podemos poner y se seleccionará.
 
-```{r}
+```{r select-indexacion}
 select(datos, edad, sexo, o1)
 ```
 
 También puedo renombrar en el mismo proceso de selección indicando `nuevo_nombre = nombre_original` en el proceso de selección
 
-```{r}
+```{r select-rename}
 select(datos, edad, sexo, ocupacion = o1)
 ```
 
@@ -209,7 +202,7 @@ select(datos, edad, sexo, ocupacion = o1)
 
 Podemos seleccionar variables y luego indicar que queremos todo el resto de las variables (`everything()`). Solo por una cosa de orden. Esto será útil sobre todo cuando tengamos identificadores
 
-```{r}
+```{r select-everything}
 select(datos, id_persona, sexo, edad, everything())
 ```
 
@@ -222,7 +215,7 @@ Podemos seleccionar variables considerando los prefijos, sufijos o partes de *c�
 - `contains()` : contiene una cadena de texto literal
 - `matches()` : coincide con una expresión regular
 
-```{r}
+```{r select-caracteres}
 select(datos, starts_with("a"), ends_with("preg"))
 
 # También se pueden combinar con operadores logicos
@@ -237,7 +230,7 @@ select(datos, matches("pobreza_|vivienda"))
 
 Si combinamos `select()` con `where()` obtendremos algo así como una frase *"seleciona donde"*, ese *donde* responde a una condición que cumple cierta variable. Por ejemplo, queremos seleccionar todas las variables que son carácteres (`is.character`):
 
-```{r}
+```{r select-condiciones}
 select(datos, where(is.character))
 ```
 
@@ -254,8 +247,8 @@ Luego de la revisión del libro de códigos y la exploración de datos mediante 
 
 ¡Apliquémos conocimientos!
 
-```{r}
-select(datos, edad, sexo, prev =592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
+```{r select varios}
+# hagamoslo juntos
 ```
 
 Es una buena práctica trabajar solo con las columnas que utilizaremos para el análisis, principalmente pues disminuye el *uso de memoria*
@@ -264,7 +257,10 @@ Es una buena práctica trabajar solo con las columnas que utilizaremos para el a
 datos_proc <- select(datos, edad, sexo, prev = 592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
 ```
 
-El nuevo objeto posee`r format(ncol(datos), decimal.mark="," , big.mark = ".")` variables (columnas), pero conserva las filas `r format( nrow(datos), decimal.mark="," , big.mark = ".")` (u observaciones) ¿Qué pasa si quiero trabajar con un *subset* de casos? La respuesta es `filter()`
+El nuevo objeto posee`r format(ncol(datos), decimal.mark="," , big.mark = ".")` variables (columnas), pero conserva las filas `r format( nrow(datos), decimal.mark="," , big.mark = ".")` (u observaciones)
+
+
+¿Qué pasa si quiero trabajar con un *subset* de casos? La respuesta es `filter()`
 
 ### 5.2 `filter()` para manipular observaciones
 
@@ -272,23 +268,24 @@ La función `filter()` de `dplyr` escoge o extrae filas basados en sus valores, 
 
 Con `filter()` será esencial el uso de los **operadores** que ya vimos, dado que las observaciones que preservarán en nuestros datos (y aquellas que no), están definidas por condiciones lógicas (relacionales o booleanas)
 
-{{< div "note" >}}
-filter(datos, condicion_para filtrar)
-Esta condición para filtrar podría ser, por ejemplo
-variable1 >= 3
-{{< /div >}}
+```{r filter-ejemplo, eval = F}
+# filter(datos, condicion_para filtrar)
+# Esta condición para filtrar podría ser, por ejemplo
+# variable1 >= 3
+```
+
 
 #### `filter` con números
 
 Imaginémos que queremos una base con las personas mayores de 15 años. Pero también que pertenezcan a hogares con menos de 7 personas. 
-```{r}
+```{r filter-numeros}
 filter(datos_proc, edad >= 15)
 filter(datos_proc, edad >= 15 & tot_per <7)
 ```
 
 ¿Y si quiero filtrar para saber el valor máximo de ingresos (`ytoth`)?
 
-```{r}
+```{r filter-maximos}
 filter(datos_proc, ytoth == max(ytoth))
 ```
 
@@ -302,29 +299,28 @@ Si queremos filtrar por la variable `sexo` solo a las mujeres, tengo dos opcione
 Ahora bien, antes hay que hacer una precisión importante: en los datos `sexo` es una variable que está como `dbl` y `lbl` (número etiquetado), por lo que no es que en la base aparezcan "Mujeres" y "Hombres", sino que 2 y 1.
 
 Por ello, con el siguiente código aparecerá un error.
-```{r}
+```{r filter-caracteres}
 filter(datos_proc, sexo == "Mujer")
 ```
 
 Una función **muy muy útil** (sobre todo cuando trabajemos con regresiones) es `as_factor()` que permite conservar los niveles pero definiendo sus categorías de respuesta en base a la etiqueta que traen (el `lbl`)
 
-```{r}
+```{r filter-factores}
 datos_proc$sexo <- as_factor(datos_proc$sexo)
 ```
 
 ¡Ahora si funcionará!
-```{r}
+```{r filter-caracteres-problemas}
 filter(datos_proc, sexo == "Mujer")
 filter(datos_proc, sexo != "Hombre")
 ```
 
-{{< div "note" >}}
 **Ojo**. R es *sensible* a cómo está escrito el texto. Si pones el mismo código pero sin respetar mayúsuculas y minúsculas el código no funcionará
-{{< /div >}}
+
 
 ¡Por último! ¿Cómo se seleccionan dos condiciones en carácter? Con el operador `%in%`
 
-```{r}
+```{r filter-in}
 datos_proc$prev <- as_factor(datos_proc$prev)
 
 filter(datos_proc, prev %in% c("Sistema Público FONASA", "ISAPRE"))
@@ -336,15 +332,16 @@ Antes de definir que observaciones vamos a conservar en una base procesada `dato
 
 La función de `mutate()` permite hacer operaciones para crear nuevas variables o transformar las ya existentes. 
 
-{{< div "note" >}}
-mutate(datos, nueva_variable = cálculo o condición)
-{{< /div >}}
+```{r mutate-ejemplo, eval = F}
+#mutate(datos, nueva_variable = cálculo o condición)
+
+```
 
 #### `mutate()` en base a cálculo
 
 Calcularemos una nueva variable llamada `nueva_variable` que proviene de la suma de 2+3. También una variable `ingreso_percapita` que proviene de la división del ingreso total del hogar y el número de personas que residen en el hogar 
 
-```{r echo=TRUE}
+```{r mutate-numeros}
 mutate(datos_proc, nueva_variable = 3+2)
 mutate(datos_proc, nueva_variable = 3+2,
        ingreso_percapita = ytoth/tot_per)
@@ -354,15 +351,15 @@ mutate(datos_proc, nueva_variable = 3+2,
 
 **¡Ahora entra en escena nuestro operador estrella ` %>% `!**
 
-{{< div "note" >}}
-datos %>% 
-  mutate(., nueva_variable = calculo ) %>% 
-  filter(., nueva_variable <= valor)
-{{< /div >}}
+```{r ejemplo-pipe, eval= F}
+#datos %>% 
+#  mutate(., nueva_variable = calculo ) %>% 
+#  filter(., nueva_variable <= valor)
+```
 
 Básicamente, el ` %>% ` permite "ingresar" nuestra base de datos como argumento para cada función e ir operándola en proceso
 
-```{r}
+```{r pipe-mutate-filter}
 datos_proc %>%
   mutate(ingreso_percapita = ytoth/tot_per) %>% 
   filter(ingreso_percapita <= 1000000)
@@ -374,30 +371,33 @@ La función denominada *recode* puede reemplazar valores numéricos en base a su
 
 En el siguiente ejemplo recodificamos las categorías de respuesta de Mujer a Femenino y de Hombre a Masculino
 
-```{r}
+```{r mutate-recode}
 datos_proc %>% 
-  mutate(sexo = recode(sexo, "Mujer" = "Femenino", "Hombre" = "Masculino"))
+  mutate(sexo = dplyr::recode(sexo, "Mujer" = "Femenino", "Hombre" = "Masculino"))
 ```
 
 El problema de `recode()` que se utiliza dentro de `dplyr` es que si recodifico se pierde la etiqueta anterior. Esto es un problema a si por ejemplo, solo quiero recodificar casos perdidos. 
 
 Frente a ello, con el tiempo nos hemos convencido de que la mejor solución hasta ahora es ocupar `recode()` del paquete `car`. Si recuerdan, dos funciones con el mismo nombre podrían producir *conflictos*, y por ello, especificaremos con `car::recode()` que la función `recode()` que ocupamos proviene de `car`
 
-{{< div "note" >}}
-datos %$% 
- car::recode(.$variable, c('valor_orig1=nuevo_valor1;valor_org2=nuevo_valor2'))
+```{r ejemplo-car, eval = F, echo = F, include = T}
+#car::recode(datos$variable, c('valor_orig1=nuevo_valor1;valor_org2=nuevo_valor2'))
+
+#datos %$% 
+# car::recode(.$variable, c('valor_orig1=nuevo_valor1;valor_org2=nuevo_valor2'))
+
+```
  
 *Ojo: %$% es el primo hermano de %>% (básicamente funcionan igual, pero este es necesario para car)*
-{{< /div >}}
 
-```{r}
+```{r car}
 datos_proc %$% 
   car::recode(.$y26d_hog, c('9=NA'))
 ```
 
 Aquí una versión de si la recodificación es hacia carácteres (mismo ejemplo que con `recode()` de `dplyr`)
 
-```{r}
+```{r car-factores}
 datos_proc %$% 
   car::recode(.$sexo, c('"Mujer"="Femenino";"Hombre"= "Masculino"'), as.factor = T)
 ```
@@ -407,21 +407,22 @@ datos_proc %$%
 
 La función `if_else()` permite construir variables en base a condiciones lógicas. Su estructura es la siguiente
 
-{{< div "note" >}}
-if_else(condición,TRUE,FALSE)
+```{r ifelse, eval=F}
+#if_else(condición,TRUE,FALSE)
+```
+
 Donde dice `TRUE` es el valor que se obtiene si la condición es verdadera, mientras que `FALSE` es todo el resto de las opciones (o cuando es FALSA)
-{{< /div >}}
 
 Crearemos una variable que *dummy* que indica si el respondente es *FONASA* o no lo es. 
 
-```{r eval=FALSE, include=TRUE}
+```{r fonasa-ifelse}
 datos_proc %>% 
  		 mutate(fonasa = if_else(prev == "Sistema Público FONASA", 1, 0))
 ```
 
 También podemos ocupar esta función como validador, por ejemplo, rellenando con valores lógicos como `FALSE` cuando no hay valores en `ytoth`. Luego esos `FALSE` podrían ser contados en otros procesos estadísticos
 
-```{r echo=TRUE}
+```{r mutate-validador}
 datos_proc %>% 
   mutate(validador_ingreso = if_else(is.na(ytoth), FALSE, TRUE))
 ```
@@ -430,16 +431,18 @@ datos_proc %>%
 
 Una función que se utiliza frecuentemente para *colapsar* categorías o construir categorías en base a varias condiciones es `case_when()` por lo lógico y *fácil* que es de entender
 
-{{< div "note" >}}
-case_when(variable == condicion ~ valor1,
-          variable == condicion ~ valor2,
-          TRUE ~ NA_real)
+
+```{r case_when, eval = F }
+#case_when(variable == condicion ~ valor1,
+#          variable == condicion ~ valor2,
+#          TRUE ~ NA_real)
+```
+
 - Donde, TRUE indica "todo el resto", y el NA dependerá de la clase del valor de recodificación
-{{< /div >}}
 
 Un ejemplo claro es cuando queremos construir *categorías de edad*
 
-```{r}
+```{r case-when-ejemplo}
 datos_proc %>% 
   mutate(edad_tramo = case_when(edad <=39 ~  "Joven",
                                 edad > 39 & edad <=59 ~ "Adulto",
@@ -452,11 +455,11 @@ Como se puede ver, no solamente indicamos tramos de la variable edad, sino que u
 
 ## 6. Resumen con procesamiento de las variables
 
-Hasta ahora, solo hemos creado una base de datos que selecciona variables. Ahora nos resta incorporar en un nuevo objeto los cambios que nos parezcan relevantes para la base de datos procesada que utilizaremos en nuestros análisis. 
+Hasta ahora, solo hemos creado una base de datos que selecciona variables. Ahora nos resta incorporar en un nuevo objeto los cambios que nos parezcan relevantes para los datos procesada que utilizaremos en nuestros análisis. 
 
 Como ya conocemos operadores que permiten concatenar procesos ( `%>%`  y `%$%`) este procedimiento será mucho más fácil. 
 
-```{r}
+```{r ejemplo-final-1}
 datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
     mutate(ingreso_percapita = ytoth/tot_per,
@@ -470,7 +473,7 @@ datos_proc %>%
 ```
 
 ¡Ahora que estamos seguras/os sobre-escribimos la base!
-```{r}
+```{r guardar-datos}
 datos_proc <- datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
     mutate(ingreso_percapita = ytoth/tot_per,
@@ -484,17 +487,19 @@ datos_proc <- datos_proc %>%
 ```
 
 Podemos visualizar la base resultante a partir de `view_df()` de `sjPlot`
-```{r}
+```{r sjplot-viewdf}
 sjPlot::view_df(datos_proc)
 ```
 
 ## 7. Guardar base procesada
 
-Para guardar la base de datos procesada, debes dirigir la ruta hacia tu Rproject
+Para guardar los datos procesada, debes dirigir la ruta hacia tu Rproject
 
 ```{r eval=FALSE, include=TRUE}
-saveRDS(datos_proc, file = "../nombre_project/output/datos_proc.rds")
+saveRDS(datos_proc, file = "output/data/datos_proc.rds")
 ```
+
+![](https://github.com/learn-R/slides/raw/main/img/01/flow-rproject.png)
 
 ## 8. Reporte de progreso
   
