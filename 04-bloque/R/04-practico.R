@@ -159,7 +159,8 @@ select(datos, where(is.character))
 # - `y26d_hog`: ¿Alguien recibió el IFE?
 
 datos_proc <- select(datos, folio, edad, sexo, prev = 592, ocupacion = o1, 
-                     tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
+                     tot_per, ytoth, starts_with("y26d_")&matches("total|hog"),
+                     o2, o3, o4, o6)
 
 
 ## 7.3. Filtrar datos  -----------------------------------------
@@ -224,12 +225,12 @@ nrow(datos_proc) #La nueva base de datos tiene 5.387 filas y 4 columnas
 
 datos_proc %>% 
   filter(edad >= 15 & tot_per <7) %>%
-  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
   na.omit()
 
 datos_proc <- datos_proc %>% 
   filter(edad >= 15 & tot_per <7) %>%
-  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
   na.omit()
 
 sjPlot::view_df(datos_proc)
@@ -240,9 +241,9 @@ sjPlot::view_df(datos_proc)
 ## Crear sets de prueba
 
 proc_1 <- datos_proc %>% select(folio, sexo, ocupacion, ytoth)
-proc_1 <- proc_1[1:1602,] #Seleccionamos la mitad de las filas
+proc_1 <- proc_1[1:908,] #Seleccionamos la mitad de las filas
 proc_2 <- datos_proc %>% select(folio, sexo, edad, tot_per, ife)
-proc_2 <- proc_2[1603:3204,] #Seleccionamos la mitad de las filas
+proc_2 <- proc_2[909:1816,] #Seleccionamos la mitad de las filas
 
 ### merge() -----------------------------------------------------------------
 

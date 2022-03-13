@@ -322,17 +322,17 @@ Luego de la revisión del libro de códigos y la exploración de datos mediante 
 ¡Apliquémos conocimientos!
 
 ```{r, eval = F}
-select(datos, folio, edad, sexo, prev =592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
+select(datos, folio, edad, sexo, prev =592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"), o2, o3, o4, o6)
 ```
 
 ```{r, include = F}
-head(select(datos, folio, edad, sexo, prev =592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog")), 5)
+head(select(datos, folio, edad, sexo, prev =592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"), o2, o3, o4, o6), 5)
 ```
 
 Es una buena práctica trabajar solo con las columnas que utilizaremos para el análisis, principalmente pues disminuye el *uso de memoria*
 
 ```{r}
-datos_proc <- select(datos, folio,  edad, sexo, prev = 592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
+datos_proc <- select(datos, folio,  edad, sexo, prev = 592, ocupacion = o1, tot_per, ytoth, starts_with("y26d_")&matches("total|hog"), o2, o3, o4, o6)
 ```
 
 El nuevo objeto posee`r format(ncol(datos), decimal.mark="," , big.mark = ".")` variables (columnas), pero conserva las filas `r format( nrow(datos), decimal.mark="," , big.mark = ".")` (u observaciones) ¿Qué pasa si quiero trabajar con un *subset* de casos? La respuesta es `filter()`
@@ -508,14 +508,14 @@ Como ya conocemos operadores que permiten concatenar procesos ( `%>%`  y `%$%`) 
 ```{r, eval = F}
 datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
- select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+ select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
  na.omit()
 ```
 
 ```{r, include = F}
 head(datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
- select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+ select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
  na.omit(), 5)
 ```
 
@@ -523,7 +523,7 @@ head(datos_proc %>%
 ```{r}
 datos_proc <- datos_proc %>% 
                filter(edad >= 15 & tot_per <7) %>%
-               select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+               select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
                na.omit()
 ```
 
@@ -540,9 +540,9 @@ Dividamos datos_proc en dos dataframes diferentes, que luego unificaremos
 
 ```{r}
 proc_1 <- datos_proc %>% select(folio, sexo, ocupacion, ytoth)
-proc_1 <- proc_1[1:1602,] #Seleccionamos la mitad de las filas
+proc_1 <- proc_1[1:908,] #Seleccionamos la mitad de las filas
 proc_2 <- datos_proc %>% select(folio, sexo, edad, tot_per, ife)
-proc_2 <- proc_2[1603:3204,] #Seleccionamos la mitad de las filas
+proc_2 <- proc_2[909:1816,] #Seleccionamos la mitad de las filas
 ```
 
 Mientras que datos_proc tiene `r format( nrow(datos_proc), decimal.mark="," , big.mark = ".")` observaciones (o filas) y `r format(ncol(datos_proc), decimal.mark="," , big.mark = ".")` variables (columnas), comp presenta `r format( nrow(comp), decimal.mark="," , big.mark = ".")` observaciones (o filas) y `r format(ncol(comp), decimal.mark="," , big.mark = ".")` variables (columnas). 
