@@ -1,31 +1,24 @@
-# Práctico 4: Transformar y seleccionar variables ----------------------
+
+# Práctico 5: Transformar y seleccionar variables ----------------------
+
 
 # 0. Instalar paquetes ----------------------------------------------------
 
-#Si ya lo instalaron, no volver a hacer.
-# Si quieren descomentar varias lineas: CTRL + Shift + C
-# install.packages("pacman")
-# library (pacman)
-
-pacman::p_load(tidyverse,
-               magrittr,
-               car,
-               sjmisc)
+pacman::p_load(tidyverse, #Universo de librerías para manipular datos
+               haven, #Para cargar datos
+               dplyr,#Para manipular datos 
+               sjmisc,#Para explorar datos
+               magrittr) #Para el operador pipeline (%>%)
 
 # 1. Importar datos -------------------------------------------------------
 
-# En este prctico, se trabajó con CASEN 2020. 
+# En este práctico, se trabajó con CASEN 2020. 
 
 datos <- read_dta("input/data/Casen en Pandemia 2020 STATA.dta") 
 
 ## 1.1. Explorar los datos  -----------------------------------------------
 
-# De paquete base
-dim(datos) # nos entrega las dimensiones, es decir el numero de observaciones y el número de variables
-View(datos) # se usa para visualizar la base de datos
-names(datos) # entrega los nombres de las variables que componen el dataset
-head(datos) # muestra las primeras filas presentes en el marco de datos
-
+head(datos, 5)
 # De sjmisc
 
 # find_var(datos, "concepto") # se utiliza para encontrar variables
@@ -93,7 +86,20 @@ head(datos) # muestra las primeras filas presentes en el marco de datos
 
 # 7. Transformación de variables ---------------------------------------------
 
-## 7.1. Seleccionar variables con dplyr ------------------------------------
+## 7.1. Seleccionar variables ------------------------------------
+
+### Con R base -------------------------------------------------------------------------
+
+datos[, 1] #Seleccionamos primera columna
+
+datos[, c(1,2,3)] #Seleccionamos columnas 1, 2 y 3
+
+datos[, 1:5] #Seleccionamos columnas de la 3 a la 5
+
+datos[, c('sexo', 'metodologia_entrev')] #Seleccionamos columnas sexo y metodologia_entrev
+
+
+### Con dplyr ---------------------------------------------------------------
 
 ### Selección por nombre de columna
 
@@ -107,11 +113,13 @@ select(datos, 1, 2) # la primera y la segunda columna
 
 select(datos, 1:4) # la primera hasta la cuarta columna
 
-select(datos, c(1,4)) # la primera y la cuarta columna
+select(datos, c(1, 4, 5)) # la primera, la cuarta y la quinta columna columna
 
 ### Selección renombrando
 
-select(datos, edad, sexo, ocupacion = o1)
+select(datos, edad, sexo, o1)
+
+select(datos, edad, sexo, ocupacion = o1) #Renombrarmos
 
 ### Para reordenar variables
 # Empleamos el argumento everything() para agregar todo el resto de variables.
@@ -150,11 +158,21 @@ select(datos, where(is.character))
 # - `y26d_total`: Monto del IFE
 # - `y26d_hog`: ¿Alguien recibió el IFE?
 
-datos_proc <- select(datos, edad, sexo, prev = 592, ocupacion = o1, 
+datos_proc <- select(datos, folio, edad, sexo, prev = 592, ocupacion = o1, 
                      tot_per, ytoth, starts_with("y26d_")&matches("total|hog"))
 
 
-## 7.3. Filtrar datos con filter() -----------------------------------------
+## 7.3. Filtrar datos  -----------------------------------------
+
+### Con R base -------------------------------------------------------------------------
+
+datos_proc[datos_proc$sexo == 2,] #Seleccionamos filas con sexo == 2
+datos_proc[datos_proc$sexo == 2 & datos_proc$edad >= 33,] #Seleccionamos filas con sexo == 3 y edad mayor o igual a 33
+datos_proc[datos_proc$prev %in% c(1,3,4),] # Seleccionamos personas con prevision 1, 3 o 4
+
+
+
+### Con dplyr ---------------------------------------------------------------
 
 # filter(datos, condicion_para filtrar)
 # Esta condición para filtrar podría ser, por ejemplo
@@ -169,6 +187,8 @@ filter(datos_proc, ytoth == max(ytoth))
 
 ### b) Con caracteres
 
+datos_proc$sexo <- as_factor(datos_proc$sexo)
+
 filter(datos_proc, sexo == "Mujer")
 filter(datos_proc, sexo != "Hombre")
 
@@ -176,77 +196,96 @@ filter(datos_proc, sexo != "Hombre")
 
 datos_proc$prev <- as_factor(datos_proc$prev)
 
-filter(datos_proc, prev %in% c("Sistema Público FONASA", "ISAPRE"))
+filter(datos_proc, prev %in% c("Sistema Público FONASA", "ISAPRE") & edad >= 65)
 
 
-## 7.4. Transformación de variables con mutate() ---------------------------
 
-#mutate(datos, nueva_variable = cálculo o condición)
+# 8. Tratamiento de casos perdidos -------------------------------------------
 
-mutate(datos_proc, nueva_variable = 3+2)
-mutate(datos_proc, nueva_variable = 3+2,
-       ingreso_percapita = ytoth/tot_per)
+## Revisar valores == NA
 
-datos_proc %>%
-  mutate(ingreso_percapita = ytoth/tot_per) %>% 
-  filter(ingreso_percapita <= 1000000)
+is.na(datos_proc) #Revisamos si hay casos perdidos en el total del set de datos 
+is.na(datos_proc$ytoth) #Revisamos si hay casos perdidos en Ingresos per cápita
 
+## Contar cuántos NA hay en df
 
-## 7.5. Recodificación con recode() ----------------------------------------
-
-### a) dplyr
-
-datos_proc %>% 
-  mutate(sexo = recode(sexo, "Mujer" = "Femenino", "Hombre" = "Masculino"))
-
-### b) car
-
-datos_proc %$% 
-  car::recode(.$sexo, c('"Mujer"="Femenino";"Hombre"= "Masculino"'), as.factor = T)
+sum(is.na(datos_proc)) #Contamos los valores nulos del set de datos en general, que suman un total de 180.148
+sum(is.na(datos_proc$ytoth)) #Contaremos los valores nulos de la variable Ingresos per cápita, que alcanzan un total de 98
 
 
-## 7.6. Construcción de variables condicionales con if_else() ---------------
+## Eliminar NA
+
+nrow(datos_proc)
+datos_proc <- na.omit(datos_proc) #Eliminamos las filas con casos perdidos
+nrow(datos_proc) #La nueva base de datos tiene 5.387 filas y 4 columnas
+
+
+# 9. Resumen de procesamiento ------------------------------------------------
 
 datos_proc %>% 
-  mutate(fonasa = if_else(prev == "Sistema Público FONASA", 1, 0))
-
-
-# 7.7. case_when() para múltiples condiciones -----------------------------
-
-# case_when(variable == condicion ~ valor1,
-#           variable == condicion ~ valor2,
-#           TRUE ~ NA_real)
-# - Donde, TRUE indica "todo el resto", y el NA dependerá de la clase del 
-# valor de recodificación
-
-datos_proc %>% 
-  mutate(edad_tramo = case_when(edad <=39 ~  "Joven",
-                                edad > 39 & edad <=59 ~ "Adulto",
-                                edad > 59 ~ "Adulto mayor",
-                                TRUE ~ NA_character_)) %>% 
-  select(edad, edad_tramo)
-
-
-# 8. Transformar el set de datos ------------------------------------------
+  filter(edad >= 15 & tot_per <7) %>%
+  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+  na.omit()
 
 datos_proc <- datos_proc %>% 
   filter(edad >= 15 & tot_per <7) %>%
-  mutate(ingreso_percapita = ytoth/tot_per,
-         edad_tramo = case_when(edad <=39 ~  "Joven",
-                                edad > 39 & edad <=59 ~ "Adulto",
-                                edad > 59 ~ "Adulto mayor",
-                                TRUE ~ NA_character_),
-         fonasa = if_else(prev == "Sistema Público FONASA", 1, 0),
-         ocupacion = as_factor(ocupacion)) %>%
-  select(sexo, edad_tramo, ocupacion, ingreso_percapita, ife = y26d_hog)
-
-
-# 9. Visualizar el set de datos -------------------------------------------
+  select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog) %>% 
+  na.omit()
 
 sjPlot::view_df(datos_proc)
 
-# 10. Guardar los datos procesados ----------------------------------------
+
+# 10. Unir datos ----------------------------------------------------------
+
+## Crear sets de prueba
+
+proc_1 <- datos_proc %>% select(folio, sexo, ocupacion, ytoth)
+proc_1 <- proc_1[1:1602,] #Seleccionamos la mitad de las filas
+proc_2 <- datos_proc %>% select(folio, sexo, edad, tot_per, ife)
+proc_2 <- proc_2[1603:3204,] #Seleccionamos la mitad de las filas
+
+### merge() -----------------------------------------------------------------
+
+merge <- merge(proc_1, proc_2, #Especificamos data frames a unificar
+               by = c("folio", "sexo"), #Especificamos la variable a partir de la cual se realiza la unificación (puede ser más de una, como folio y sexo)
+               all = T) #Especificamos que queremos mantener total de filas, sumando las de x (proc_1) e y (proc_2)
+
+head(merge)
+
+### bind_cols() -------------------------------------------------------------
+
+bind_columnas <- bind_cols(proc_1, proc_2)
+
+head(bind_columnas)
+
+### bind_rows() -------------------------------------------------------------
+
+bind_filas <- bind_rows(proc_1, proc_2)
+
+head(bind_filas)
+
+
+# 11. Exportar datos ------------------------------------------------------
 
 saveRDS(datos_proc, file = "output/data/datos_proc.rds")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
