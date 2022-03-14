@@ -493,8 +493,8 @@ Una vez identificamos los _valores nulos_, podemos proceder a **eliminarlos** de
 
 ```{r}
 nrow(datos_proc)
-datos_proc <- na.omit(datos_proc) #Eliminamos las filas con casos perdidos
-nrow(datos_proc) #La nueva base de datos tiene 5.387 filas y 4 columnas
+nrow(datos_proc)
+nrow(na.omit(datos_proc)) #Eliminamos las filas con casos perdidos y contamos el número de filas luego de eliminar NA
 ```
 
 ¡La próxima sesión aprenderemos a recodificarlas!
@@ -508,23 +508,20 @@ Como ya conocemos operadores que permiten concatenar procesos ( `%>%`  y `%$%`) 
 ```{r, eval = F}
 datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
- select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
- na.omit()
+ select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6)
 ```
 
 ```{r, include = F}
 head(datos_proc %>% 
  filter(edad >= 15 & tot_per <7) %>%
- select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
- na.omit(), 5)
+ select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6))
 ```
 
 ¡Ahora que estamos seguras/os sobre-escribimos la base!
 ```{r}
 datos_proc <- datos_proc %>% 
                filter(edad >= 15 & tot_per <7) %>%
-               select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) %>% 
-               na.omit()
+               select(folio, sexo, edad, ocupacion, ytoth, tot_per, ife = y26d_hog, o2, o3, o4, o6) 
 ```
 
 Podemos visualizar la base resultante a partir de `view_df()` de `sjPlot`

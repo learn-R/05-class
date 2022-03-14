@@ -217,8 +217,7 @@ sum(is.na(datos_proc$ytoth)) #Contaremos los valores nulos de la variable Ingres
 ## Eliminar NA
 
 nrow(datos_proc)
-datos_proc <- na.omit(datos_proc) #Eliminamos las filas con casos perdidos
-nrow(datos_proc) #La nueva base de datos tiene 5.387 filas y 4 columnas
+nrow(na.omit(datos_proc)) #Eliminamos las filas con casos perdidos y contamos el número de filas luego de eliminar NA
 
 
 # 9. Resumen de procesamiento ------------------------------------------------
